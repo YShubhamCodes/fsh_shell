@@ -38,3 +38,20 @@ int main(int argc, char **argv){
     // Perform any shutdown()/cleanup()
     return EXIT_SUCCESS;
 }
+
+char* fsh_read_line(void){
+    char *line;
+    ssize_t bufsize = 0; // getline() will allocate a buffer
+
+    if(getline(&line, &bufsize, stdin) == -1){
+        if(feof(stdin)) {
+            exit(EXIT_FAILURE);
+        }
+        else{
+            perror("readline");
+            exit(EXIT_FAILURE);
+        }
+    }
+    return line;
+}
+

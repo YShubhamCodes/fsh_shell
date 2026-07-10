@@ -4,23 +4,29 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "utils.h"
+
 
 void lsh_loop(void){
     char *line;
-    char **args;
+    Pipeline pipe_line;
     int status;
 
     do{
         printf("fsh$> ");
         line = fsh_read_line();
-        args = fsh_split_line(line);
-        status = fsh_execute(args);
 
+        //parse the line into the Pipeline structure
+        fsh_split_line(line, &pipe_line);
+
+        status = fsh_execute(&pipe_line);
+
+        // Freeing after execution of prompt
         free(line);
-        free(args);
-        
-    }
+
+    } while(status);
 }
+
 
 
 int main(int argc, char **argv){

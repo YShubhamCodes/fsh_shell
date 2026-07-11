@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "utils.h"
 
@@ -110,4 +111,92 @@ void fsh_split_line(char* line, Pipeline *pipeline){
         // Move to the next pipe segment
         cmd_segment = strtok_r(NULL, "|", &pipe_saveptr);
     }
+}
+
+int fsh_execute(Pipeline *pipeline){
+    if(pipeline->command_count == 0){
+        return 1; // No command entered
+    }
+
+    //Built-in command check; if first command is exit, then close
+    if(pipeline->commands[0].argv[0] != NULL && strcmp(pipeline->commands[0].argv[0], "exit") == 0){
+        return 0;
+    }
+
+    // We keep track of the read end of the previous pipe stage
+    // For the very first command, there is no previous pipe
+    int prev_pipe_read_fd = STDIN_FILENO;
+
+    // Loop through every command stage in our pipeline array
+    for(int i = 0; i < pipeline->command_count; i++){
+        Command *cmd = &pipeline->commands[i];
+
+        // pipefds[0] is the read end, after pipe() sys call
+        // pipefds[1] is the write end, after pipe() sys call
+        int pipefds[2];
+        int has_next_pipe = (i < pipeline->command_count -1);
+
+        // if there is next command stage, create a new UNIX pipe
+        if(has_next_pipe){
+            if(pipe(pipefds) < 0){
+                perror("fsh: pipe creation failed");
+                return 1;
+            }
+        }
+        pid_t pid = fork();
+        if(pid == 0){
+            // CHILD PROCESS
+            // ===================== LOT OF WORK TO DO ======================
+            // 1. Link pipeline Input: if this isn't the first command, grab input from the last pipe
+            if(i > 0){
+                dup2(prev_pipe_read_fd, STDIN_FILENO);
+                close(prev_pipe_read_fd);
+            }
+
+            // 2. Link Pipeline ouput: if there is a next command, pipe stdout into it
+            if(has_next_pipe){
+                close(pipefds[0]); // child process created pipe. only writing to next pipe; readend not needed
+                dup2(pipefds[1], STDOUT_FILENO);
+                close(pipefds[1]);
+            }
+
+            // 3. Apply file redirections: Overwrite pipe mapping its explicit redirection 
+            if(cmd->input_file != NULL){
+                int fd_in = open(cmd->input_file, O_RDONLY);
+                if(fd_in < 0){
+                    perror("fsh: input file error");
+                    exit(EXIT_FAILURE);
+
+                }
+                dup2(fd_in, STDIN_FILENO);
+                close(fd_in);
+            }
+
+            // 4. Fire Process Execution
+            if(execvp(cmd->argv[0], cmd->argv) == -1){
+                perror("fsh: execution error");
+            }
+            exit(EXIT_FAILURE);
+        }
+        else if(pid < 0){
+            perror("fsh: fork failed");
+            return 1;
+        }
+        else{
+            // PARENT PROCESS (SHELL MANGER)
+            // Clean up tracking file descriptors in the parent shell loop
+            if(i > 0){
+                close(prev_pipe_read_fd);
+            }
+            if(has_next_pipe){
+                close(pipefds[1]);
+                prev_pipe_read_fd = pipefds[0]; // important linking line; it links the currents pipe read end and stores the data in the prev_pipe_read_fd for next iteration
+            }
+        }
+    }
+
+    // After starting all the forks in the pipeline, shell parent waits for the child process
+    while(wait(NULL) > 0);
+
+    return 1; // Keep shell loop alive
 }

@@ -101,6 +101,7 @@ void fsh_split_line(char* line, Pipeline *pipeline){
             token = strtok_r(NULL, " \t\r\n\a", &arg_saveptr);
         }
         // Explicitly NULL terminate the argv array after the prompt/segment
+        // if not then the kernel would try to read beyond your argv array which will lead to segmentation fault and hell lotta crashes. This tells the kernel to stop.
         current_cmd->argv[arg_idx] = NULL;
 
         // increament command count
@@ -125,16 +126,17 @@ int fsh_execute(Pipeline *pipeline){
 
     // We keep track of the read end of the previous pipe stage
     // For the very first command, there is no previous pipe
-    int prev_pipe_read_fd = STDIN_FILENO;
+    int prev_pipe_read_fd = STDIN_FILENO; // It stores the readend value from the previous pipe iteration
 
     // Loop through every command stage in our pipeline array
     for(int i = 0; i < pipeline->command_count; i++){
-        Command *cmd = &pipeline->commands[i];
+        Command *cmd = &pipeline->commands[i]; // shortcut
 
         // pipefds[0] is the read end, after pipe() sys call
         // pipefds[1] is the write end, after pipe() sys call
         int pipefds[2];
-        int has_next_pipe = (i < pipeline->command_count -1);
+        
+        int has_next_pipe = (i < pipeline->command_count -1); // Stores a bool value, can be of boolean data style
 
         // if there is next command stage, create a new UNIX pipe
         if(has_next_pipe){

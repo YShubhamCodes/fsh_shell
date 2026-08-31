@@ -193,7 +193,7 @@ int fsh_execute(Pipeline *pipeline){
             return 1;
         }
         else{
-            // PARENT PROCESS (SHELL MANGER)
+            // PARENT PROCESS (SHELL MANAGER)
             // Clean up tracking file descriptors in the parent shell loop
             if(i > 0){
                 close(prev_pipe_read_fd);

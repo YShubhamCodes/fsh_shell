@@ -16,4 +16,14 @@ typedef struct {
 } Pipeline;
 
 
+// Function Declarations for Built-in Shell Commands
+int fsh_cd(char **args);
+int fsh_help(char **args);
+int fsh_exit(char **args);
+int fsh_num_builtins(void);
+
+// Declare external variables if shell.c needs to read them
+extern char *builtin_str[];
+extern int (*builtin_func[]) (char **);
+
 #endif

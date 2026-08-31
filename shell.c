@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
 
+#include "utils.c"
 #include "utils.h"
+
 
 
 void lsh_loop(void){
@@ -120,8 +123,13 @@ int fsh_execute(Pipeline *pipeline){
     }
 
     //Built-in command check; if first command is exit, then close
-    if(pipeline->commands[0].argv[0] != NULL && strcmp(pipeline->commands[0].argv[0], "exit") == 0){
-        return 0;
+    if(pipeline->commands[0].argv[0] != NULL){
+        for(int i = 0; i < fsh_num_builtins(); i++){
+            if(strcmp(pipeline->commands[0].argv[0], builtin_str[i]) == 0){
+                // Execute the built-in function directly in parent process
+                return(*builtin_func[i])(pipeline->commands[0].argv);
+            }
+        }
     }
 
     // We keep track of the read end of the previous pipe stage
@@ -135,7 +143,7 @@ int fsh_execute(Pipeline *pipeline){
         // pipefds[0] is the read end, after pipe() sys call
         // pipefds[1] is the write end, after pipe() sys call
         int pipefds[2];
-        
+
         int has_next_pipe = (i < pipeline->command_count -1); // Stores a bool value, can be of boolean data style
 
         // if there is next command stage, create a new UNIX pipe
@@ -202,3 +210,4 @@ int fsh_execute(Pipeline *pipeline){
 
     return 1; // Keep shell loop alive
 }
+

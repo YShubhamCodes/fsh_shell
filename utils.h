@@ -1,4 +1,4 @@
-#ifndef UTIL_H
+#ifndef UTILS_H
 #define UTILS_H
 
 #define MAX_ARGS 64
@@ -14,6 +14,11 @@ typedef struct {
     Command commands[MAX_COMMANDS];
     int command_count;
 } Pipeline;
+
+// Function Declarations for shell.c
+char* fsh_read_line(void);
+void fsh_split_line(char* line, Pipeline *pipeline);
+int fsh_execute(Pipeline *pipeline);
 
 
 // Function Declarations for Built-in Shell Commands

@@ -1,0 +1,38 @@
+# === Compiled binaries ===
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dll
+*.dylib
+
+# Common binary output names (edit/add your actual executable name)
+build/
+bin/
+
+# This project's executable
+shell
+
+# === Debug/build artifacts ===
+*.dSYM/
+*.su
+*.idb
+*.pdb
+*.gch
+*.pch
+
+# === Editor / IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === OS junk ===
+.DS_Store
+Thumbs.db
+
+# === Misc ===
+*.log

@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "utils.c"
 #include "utils.h"
 
 
@@ -45,7 +44,7 @@ int main(int argc, char **argv){
 
 char* fsh_read_line(void){
     char *line;
-    ssize_t bufsize = 0; // getline() will allocate a buffer
+    size_t bufsize = 0; // getline() will allocate a buffer
 
     if(getline(&line, &bufsize, stdin) == -1){
         if(feof(stdin)) {
@@ -56,6 +55,7 @@ char* fsh_read_line(void){
             exit(EXIT_FAILURE);
         }
     }
+    add_to_history(line);
     return line;
 }
 

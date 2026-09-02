@@ -178,10 +178,19 @@ int fsh_execute(Pipeline *pipeline){
                 if(fd_in < 0){
                     perror("fsh: input file error");
                     exit(EXIT_FAILURE);
-
                 }
                 dup2(fd_in, STDIN_FILENO);
                 close(fd_in);
+            }
+
+            if(cmd->output_file != NULL){
+                int fd_out = open(cmd->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if(fd_out < 0){
+                    perror("fsh: output file error");
+                    exit(EXIT_FAILURE);
+                }
+                dup2(fd_out, STDOUT_FILENO);
+                close(fd_out);
             }
 
             // 4. Fire Process Execution

@@ -1,7 +1,8 @@
-# Project Name
+# Shell Project
 
 > What do u call a fish no eyes *fsh*... bad joke, Okay just imagine I rhymed it zsh.
-Fsh is a lightweight Unix shell implemented in C which supports piping, redirection and built-in commands. This was created by a student for practice...
+
+Fsh is a lightweight Unix shell implemented in C which supports piping, redirection and built-in commands. This was created by a student for practice and tries to explain OS concepts in detail.
 
 This project explores core operating system concepts—including process forking, file descriptors, piping, and I/O redirection. Built with manual memory management and custom data structures, it features robust error handling and handles input parsing and tokenization using strtok and strtok_r.
 
@@ -14,6 +15,7 @@ This project explores core operating system concepts—including process forking
 - [✅] Piping (`|`)
 - [✅] I/O redirection (`>`, `<`)
 - [✅] Command history
+- [⬜] Append >> logic
 - [⬜] Background processes (`&`)
 - [⬜] Signal handling (Ctrl+C, Ctrl+Z)
 
@@ -72,6 +74,7 @@ make
 .
 fsh_shell/
 ├── README.md
+├── LICENSE
 ├── Makefile
 ├── shell.c
 ├── utils.c
@@ -85,9 +88,6 @@ fsh_shell/
 
 ## How It Works
 
-A brief technical walkthrough of the architecture — this is what separates a "student project" from a "professional-looking project." Explain, at a high level:
-
-- How input is read and parsed (tokenizing the command line)
 ##    **Line Parsing** 
 - I implemented a simple parser which tokenizes using strtok_r wih standard shell delimiters. I used double tokenizers to seperate piped commands and standard commands. 
 - strtok_r() is preffered over strtok() since it essentially gives up more control over pointers and thread safety
@@ -96,10 +96,10 @@ A brief technical walkthrough of the architecture — this is what separates a "
 ##    **Custom Structs**
 - In the Command struct we have:
         * *argv array which stores pointers of the actual argument tokenized from above.
-        * chat *input_file/ *ouput_file which points to file path tokenized above.
+        * chat *input_file/ *output_file which points to file path tokenized above.
 - Pipeline struct has: 
         * Command command array which stores the above custom data type command as array.
-        * command_count int increamented after every command is added.
+        * command_count int incremented after every command is added.
 
 ##    **Execution Logic**
 - Why execution logic is needed first of all?
@@ -174,9 +174,10 @@ Everything else — programs like `ls`, `cat`, `grep` — genuinely lives on dis
             ~ stdout no longer goes to terminal
             ~ stdout goes to output.txt
         - Core idea I learned is programs shouldn't know where the ouput go, they should simply read and write from standard streams which makes the whole system reusable.
-        - Pipes basically implement this `Redirection`. It is a kernel managed communication channel. It is a core inter-process communication mechanisms that channels the standard ouput(stdout) of one process directly into the standard input(stdin) of another. fsh_execute() basically handles that...
+        - Pipes basically implement this `Redirection`. It is a kernel managed communication channel. It is a core inter-process communication mechanisms that channels the standard ouput(stdout) of one               process directly into the standard input(stdin) of another. fsh_execute() basically handles that...
 
     * Signals, Process Groups, Job Control and the Terminal(TTY/PTTY).
+    * 
     - **Command Lifecycle**
     ```text
     Keyboard ➔ TTY ➔ `Shell` ➔ Parse ➔ PATH Resolution ➔ Create Process ➔ Setup FD ➔ Setup Pipe ➔ Load ELF ➔ Execute ➔ Program Running

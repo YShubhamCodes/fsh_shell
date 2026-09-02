@@ -34,6 +34,7 @@ int fsh_num_builtins(void){
 
 // 1. Built-in 'cd' function
 int fsh_cd(char **args){
+    (void) args;
     char *target_dir = args[1];
     if(target_dir == NULL){
         // if user types 'cd' , default to HOME environment
@@ -61,6 +62,7 @@ int fsh_cd(char **args){
 
 // 2. Built-in 'help' (Print instructions)
 int fsh_help(char **args){
+    (void) args;
     printf("--- Friendly Shell (fsh) Help ---\n");
     printf("Type program names and arguments, then hit enter. \n");
     printf("The following commands are built-in:\n");
@@ -74,6 +76,7 @@ int fsh_help(char **args){
 }
 
 int fsh_exit(char **args){
+    (void) args;
     return 0;
 }
 
@@ -90,6 +93,8 @@ void add_to_history(char *line){
 }
 
 int fsh_history(char **args){
+    (void)args;
+    
     int start = (history_count < HISTORY_SIZE) ? 0 : history_index;
     int n = (history_count < HISTORY_SIZE) ? history_count : HISTORY_SIZE;
     
